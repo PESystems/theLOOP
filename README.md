@@ -1,109 +1,69 @@
 # LOOP
 **Live Overview of Open Projects**
 
-> A second brain for execution, not just storage.
+> LOOP is not a “Claude setup.” It is a control system for AI-assisted work that forces task classification, execution honesty, and governed knowledge promotion.
 
-LOOP is my attempt at building a system that can take messy real-world input and turn it into structured, usable, evolving operational context.
+![LOOP control-system overview](assets/loop-infographic-notebooklm-v1.webp)
 
-Most project systems are good at one part of the job:
-- capture
-- planning
-- documentation
-- task tracking
-- automation
+## What this is
 
-LOOP is trying to connect all of them without pretending they are the same thing.
+LOOP is an attempt to build a working system for AI-assisted execution that does not collapse planning, execution, memory, and truth into the same surface.
 
-It is not finished.
-Some parts are sharp.
-Some parts are still being figured out in public.
+The claim is simple:
 
-I’m sharing it because I think the architecture is interesting, it already works in real use, and feedback will make it better.
+Most AI workflows feel impressive at first, then get sloppy.
+They blur:
+- raw input
+- working context
+- plans
+- executed actions
+- canonical truth
 
-![LOOP topology](assets/loop-topology.svg)
+LOOP tries to separate them on purpose.
 
-**Start here:**
-- [Topology overview](docs/architecture/loop-topology.md)
-- [Docs index](docs/README.md)
-- [AutoResearch integration plan](docs/roadmap/autoresearch-integration-plan.md)
+## The thesis
 
----
+LOOP makes three core bets:
 
-## What LOOP means
+1. **Intelligence without routing is unreliable**
+   Every task should be classified before action.
 
-**LOOP = Live Overview of Open Projects**
+2. **Planning and execution are not the same event**
+   A draft is not a result. A plan is not a change. Suggested work is not completed work.
 
-The goal is simple:
+3. **Truth should be promoted, not assumed**
+   Generated material should not become canonical just because it exists.
 
-> keep the real state of active work visible, structured, and connected across tools, agents, and artifacts.
+That is the real point of the system.
 
----
+## Why this matters
 
-## Core model
+Most AI tooling is optimized for generation.
+LOOP is trying to optimize for:
+- governed execution
+- inspectable state
+- bounded agency
+- reusable operational context
+- cleaner handoffs between humans, chats, files, and execution surfaces
 
-LOOP is built around a layered architecture:
+In other words:
 
-- **The Node** → shared coordination truth
-- **The Container** → stable doctrine, skills, and behavior-shaping context
-- **The Floor** → real execution, files, repos, scripts, and local side effects
+> not smarter chat for its own sake
+>
+> better control over AI-assisted work
 
-Supporting roles sit around that core:
+## A real example
 
-- **Theo** → strategy, critique, architecture pressure-testing
-- **Lenny’s Brain** → planning, routing, synthesis, controlled low-risk action
-- **Cowork / Claude Code** → structured execution on the Floor
-- **The Relay / Connectors** → integrations and automation surfaces
+One practical test for LOOP was taking a rough handwritten project dump and turning it into structured project context.
 
-Two core rules matter a lot here:
-
-> planning is not execution
-
-> distill, don’t duplicate
-
-The same thing can appear in more than one layer only when each copy is doing a different job.
-
----
-
-## Why this exists
-
-Most systems fall apart somewhere between:
-- rough ideas
-- partial notes
-- execution
-- handoffs
-- “what was actually decided?”
-
-I kept running into the same problems:
-- context getting lost across chats and tools
-- work duplicated in multiple places
-- plans pretending to be execution
-- notes that were technically saved but operationally dead
-
-So I kept iterating toward a system that separates:
-- shared state
-- operating rules
-- execution surfaces
-
-That became LOOP.
-
----
-
-## Real example
-
-One of the practical tests for LOOP was simple:
-
-Could it take a rough handwritten project dump and turn it into usable structured system state?
-
-In practice, the answer was yes.
-
-A handwritten notebook page containing:
+A notebook page with:
 - client names
-- partial scopes
+- partial scope notes
 - equipment references
 - contact cues
 - follow-up hints
 
-was pushed through a structured intake contract and used to generate project context that could connect to:
+was pushed through a structured intake contract and used to generate project records that could connect to:
 - clients
 - project types
 - system types
@@ -112,78 +72,62 @@ was pushed through a structured intake contract and used to generate project con
 - import notes
 - AI scope summaries
 
-The interesting part is not just immediate cleanup.
+The value was not just cleanup.
+It was the beginning of **compounding context**.
 
-It is **future compounding context**.
+## Core architecture
 
----
+LOOP uses a layered model:
 
-## What makes LOOP different
+- **The Node** → coordination truth
+- **The Container** → behavioral truth
+- **The Floor** → execution truth
 
-The useful difference is not just “AI”.
+Supporting roles sit around that core:
 
-It is **boundary discipline**.
+- **Theo** → strategy, critique, architecture pressure-testing
+- **Lenny’s Brain** → planning, routing, synthesis, controlled low-risk action
+- **Cowork / Claude Code** → structured execution on the Floor
+- **The Relay / Connectors** → integrations and automation surfaces
 
-LOOP tries to stay strict about:
-- where shared truth lives
-- where behavior rules live
-- where execution truth lives
-- what has actually been executed vs only planned
-- what should be promoted vs kept provisional
-- how raw output becomes reusable infrastructure
+Two governing rules matter a lot:
 
----
+> planning is not execution
+
+> distill, don’t duplicate
 
 ## Current state
 
-Right now this repo represents a system that is:
-- real
-- evolving
-- partially formalized
-- already useful
-- not yet finished
+This repo is not a polished framework release.
+It is an early public version of a working system.
 
-This is not a polished framework drop.
-It is a working system being cleaned up and made shareable.
+Right now it is strongest as:
+- a theory of governed AI work
+- a system architecture and operating model
+- a structured intake / validation / write-through direction
+- a starting point for human-in-the-loop agent workflows
 
----
+It is still unfinished.
+That is part of why it is worth sharing early.
 
-## Repo structure
+## Start here
 
-```text
-assets/
-docs/
-  architecture/
-  roadmap/
-README.md
-CONTRIBUTING.md
-```
+- [Topology overview](docs/architecture/loop-topology.md)
+- [YAML → Notion pipeline spec](docs/specs/yaml-to-notion-pipeline.md)
+- [AutoResearch integration plan](docs/roadmap/autoresearch-integration-plan.md)
+- [Architecture reference](docs/references/loop-architecture-v2.4.md)
+- [Doctrine addendum](docs/references/loop-doctrine-addendum-v2.4.1.md)
 
-This is intentionally lean for the first public push.
+## Feedback I actually want
 
----
+Useful feedback is not “cool idea.”
 
-## Feedback welcome
-
-This repo is being shared in a pretty honest state.
-
-Some parts are well-shaped.
-Some parts are rough.
-A few decisions were made because they kept working in practice, not because they emerged from perfect theory.
-
-If you’ve built:
-- second-brain systems
-- agent workflows
-- structured knowledge pipelines
-- personal operating systems
-- human-in-the-loop automation
-
-I’d genuinely like feedback on:
-- weak assumptions
-- architecture boundaries
+Useful feedback is:
+- where the boundaries are weak
 - where the system is overbuilt
-- where it is underbuilt
-- what should be made more portable
+- where it is under-specified
 - what should stay opinionated
+- what should become more portable
+- what failure modes I am not seeing yet
 
-Useful > polite.
+If you have built second-brain systems, agent workflows, structured knowledge pipelines, or human-in-the-loop automation, that is the kind of feedback I care about most.
