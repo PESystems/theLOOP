@@ -26,4 +26,7 @@ The model is trying to protect a few boundaries:
 ## Related docs
 
 - [Docs index](../README.md)
+- [Why LOOP is worth sharing](../vision/why-loop-is-worth-sharing.md)
+- [Notion as coordination layer](notion-as-coordination-layer.md)
+- [Execution surfaces](execution-surfaces.md)
 - [AutoResearch integration plan](../roadmap/autoresearch-integration-plan.md)
