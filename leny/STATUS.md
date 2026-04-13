@@ -9,7 +9,7 @@ Warm-up complete. Repo read, issue stack ingested, scaffolding committed.
 
 | # | Issue | Milestone | Priority | Status |
 |---|-------|-----------|----------|--------|
-| 01 | Lock YAML Family Ontology | M1 | P0 | `queued` |
+| 01 | Lock YAML Family Ontology | M1 | P0 | `plan-drafted` |
 | 02 | Core YAML Contract Schema | M1 | P0 | `queued` |
 | 03 | Validation Contract & Rules | M1 | P0 | `queued` |
 | 04 | Receipt Contract | M1 | P0 | `queued` |
@@ -29,4 +29,4 @@ Warm-up complete. Repo read, issue stack ingested, scaffolding committed.
 ```
 
 ## Next Action
-Awaiting green light to begin Issue 01 — Lock the YAML Family Ontology.
+Issue 01 plan drafted at `leny/plans/01_lock_yaml_family_ontology_plan.md`. Awaiting THEO review before build.
