@@ -5,11 +5,11 @@
 ## Current State
 Warm-up complete. Repo read, issue stack ingested, scaffolding committed.
 
-## Issue Stack — YAML Family v0.3
+## Issue Stack — Contract Spine v0.3
 
 | # | Issue | Milestone | Priority | Status |
 |---|-------|-----------|----------|--------|
-| 01 | Lock YAML Family Ontology | M1 | P0 | `built — awaiting THEO review` |
+| 01 | Lock Contract Spine Ontology | M1 | P0 | `built — awaiting THEO review` |
 | 02 | Core YAML Contract Schema | M1 | P0 | `queued` |
 | 03 | Validation Contract & Rules | M1 | P0 | `queued` |
 | 04 | Receipt Contract | M1 | P0 | `queued` |
@@ -30,3 +30,4 @@ Warm-up complete. Repo read, issue stack ingested, scaffolding committed.
 
 ## Next Action
 Issue 01 built. Ontology + decision log at `docs/ontology/`. Marked draft — awaiting THEO canonical review before promotion.
+Contract Spine naming closure pass complete. 4 artifacts + 5 safe edits. Awaiting THEO sign-off review.

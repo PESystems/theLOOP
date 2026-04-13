@@ -1,6 +1,8 @@
+> **Naming notice (2026-04-13):** This document was authored under the prior "YAML Family" umbrella name. The active umbrella is now **LOOP Contract Spine**. See [`docs/naming/LOOP_contract_spine_nomenclature_v0.1.md`](../naming/LOOP_contract_spine_nomenclature_v0.1.md).
+
 # Ontology Decision Log
 
-> Issue 01 — Lock the YAML Family Ontology
+> Issue 01 — Lock the Contract Spine Ontology (originally: Lock the YAML Family Ontology)
 > Author: LENY
 > Date: 2026-04-13
 

@@ -1,11 +1,13 @@
+> **Naming notice (2026-04-13):** This document was authored under the prior "YAML Family" umbrella name. The active umbrella is now **LOOP Contract Spine**. See [`docs/naming/LOOP_contract_spine_nomenclature_v0.1.md`](../naming/LOOP_contract_spine_nomenclature_v0.1.md) for the naming lock. The ontology content below remains valid and is referenced by the active Contract Spine issue stack.
+
 # YAML Family Ontology v0.3
 
 > Status: `draft` — awaiting THEO canonical review
 > Author: LENY
 > Date: 2026-04-13
-> Authority: Issue 01 — Lock the YAML Family Ontology
+> Authority: Issue 01 — Lock the Contract Spine Ontology (originally: Lock the YAML Family Ontology)
 
-This document defines the shared ontology for the LOOP YAML contract family. All lanes, adapters, schemas, and receipts must use these terms with the meanings defined here. Lane-specific language must map back to these canonical terms — never invent parallel concepts.
+This document defines the shared ontology for the LOOP Contract Spine. All lanes, adapters, schemas, and receipts must use these terms with the meanings defined here. Lane-specific language must map back to these canonical terms — never invent parallel concepts.
 
 ---
 
@@ -194,7 +196,7 @@ These patterns indicate the ontology is being violated. Any lane, adapter, or sc
 
 ## Governance
 
-- This ontology is the authority for term meaning across the YAML family.
+- This ontology is the authority for term meaning across the Contract Spine.
 - Changes require explicit review (THEO or Malik).
 - No lane, adapter, or schema may override these definitions.
 - If a term is missing, propose an ontology addition — do not create a local synonym.

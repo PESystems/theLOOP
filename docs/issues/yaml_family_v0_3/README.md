@@ -1,6 +1,8 @@
-# LOOP YAML Family Issue Stack v0.3
+> **Deprecation notice (2026-04-13):** This folder is **historical**. The active issue stack is at [`docs/issues/contract_spine_v0_3/`](../contract_spine_v0_3/README.md) under the **LOOP Contract Spine** umbrella name. See [`docs/naming/LOOP_contract_spine_nomenclature_v0.1.md`](../../naming/LOOP_contract_spine_nomenclature_v0.1.md) for the naming lock. Issue files below are preserved as-is for auditability.
 
-This folder contains GitHub-ready issue bodies for the YAML family contract-layer refactor.
+# LOOP YAML Family Issue Stack v0.3 *(historical)*
+
+This folder contains the original issue bodies for the contract-layer refactor, authored under the prior "YAML Family" umbrella name.
 
 ## Recommended order
 1. 01_lock_yaml_family_ontology.md
