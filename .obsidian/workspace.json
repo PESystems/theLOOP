@@ -11,10 +11,14 @@
             "id": "1a28f024e88850ee",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "docs/issues/yaml_family_v0_3/03_build_validation_contract_and_rules.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "03_build_validation_contract_and_rules"
             }
           }
         ]
@@ -176,6 +180,41 @@
       "bases:Create new base": false
     }
   },
-  "active": "1a28f024e88850ee",
-  "lastOpenFiles": []
+  "active": "3c3775533f0fb77e",
+  "lastOpenFiles": [
+    "docs/issues/contract_spine_v0_3/11_skill_sync_hook_ingress_adapter.md",
+    "docs/naming/LOOP_blockers_contract_spine_final_closure_v0.1__20260413__draft.md",
+    "docs/naming/LOOP_receipt_contract_spine_floor_sync_v0.1__20260413__exec.md",
+    "docs/naming/LOOP_note_contract_spine_floor_sync_v0.1__20260413__exec.md",
+    "docs/naming/LOOP_receipt_contract_spine_naming_cleanup_v0.1__20260413__exec.md",
+    "docs/naming/LOOP_packet_contract_spine_naming_cleanup_v0.1__20260413__draft.md",
+    "docs/naming/LOOP_audit_contract_spine_reference_overhaul_v0.1__20260413__audit.md",
+    "docs/naming/LOOP_memo_contract_spine_naming_closure_v0.1__20260413__draft.md",
+    "docs/issues/contract_spine_v0_3/10_build_contract_spine_acceptance_pack.md",
+    "docs/issues/contract_spine_v0_3/09_migrate_existing_spine_lanes.md",
+    "docs/issues/contract_spine_v0_3/08_enforce_node_compile_boundary.md",
+    "docs/issues/contract_spine_v0_3/07_define_floor_execution_lane.md",
+    "docs/issues/contract_spine_v0_3/06_define_claude_ai_ingress_lane.md",
+    "docs/issues/contract_spine_v0_3/05_define_adapter_layer_pattern.md",
+    "docs/issues/contract_spine_v0_3/04_build_receipt_layer_contract.md",
+    "docs/naming/LOOP_contract_spine_nomenclature_v0.1.md",
+    "docs/naming",
+    "docs/issues/contract_spine_v0_3/README.md",
+    "docs/issues/contract_spine_v0_3/03_build_validation_layer_contract.md",
+    "docs/issues/contract_spine_v0_3/02_establish_core_contract_spine_schema.md",
+    "docs/issues/contract_spine_v0_3/01_lock_contract_spine_ontology.md",
+    "docs/issues/contract_spine_v0_3",
+    "docs/ontology/ontology_decision_log.md",
+    "docs/ontology/yaml_family_ontology.md",
+    "docs/ontology",
+    "leny/plans/01_lock_yaml_family_ontology_plan.md",
+    "leny/receipts",
+    "leny/plans",
+    "leny/STATUS.md",
+    "leny",
+    "AGENTS.md",
+    "docs/issues/yaml_family_v0_3/02_establish_core_yaml_contract_schema.md",
+    "assets/loop-topology.svg",
+    "assets/loop-infographic-notebooklm-v1.webp"
+  ]
 }
