@@ -44,7 +44,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 ### claim
 
-**Definition:** A specific assertion extracted from a source, attached to one or more entities. Claims carry meaning that can be validated as true, false, uncertain, or conflicting.
+**Definition:** A specific assertion extracted from a source, attached to one or more entities. Claims carry meaning that resolves to a `validation_state` outcome: `pass`, `fail`, `provisional`, `blocked`, or `conflict`.
 
 **Role in pipeline:** Claims are the atomic units of validation. The validation contract evaluates claims, not entities or artifacts as wholes.
 
@@ -96,7 +96,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Definition:** A surface-specific translation layer that wraps the core contract for consumption or emission on a particular runtime. Adapters specify *how* a surface interacts with the contract — read order, field mapping, preflight rules, receipt emission format.
 
-**Role in pipeline:** Adapters sit between the core contract and execution surfaces (Claude.ai, Floor/Cowork, Node/Notion). Each surface gets one adapter via the Adapter Layer. The adapter translates without redefining.
+**Role in pipeline:** Adapters sit between the core contract and each execution surface. Each surface gets one adapter via the Adapter Layer. The adapter translates without redefining.
 
 **What it is NOT:** Not a packet or schema. A packet is a bounded unit of work. A schema defines structure. An adapter defines *how a surface uses* the schema and packets. Adapters may NOT redefine canonical ontology terms — they translate surface-specific concerns only. An adapter that changes what "claim" means is a broken adapter.
 
@@ -133,19 +133,19 @@ adapter wraps [source, artifact, receipt] per surface
 
 ### Ingress Lane — Google Doc enters the system
 
-1. **source** — a Google Doc URL shared in Claude.ai chat
-2. **artifact** — LENY normalizes the doc content into a structured contract
+1. **source** — a document URL received by the cloud ingress surface
+2. **artifact** — the Ingress Lane normalizes the content into a structured contract
 3. **entity** — extraction identifies: `Yaskawa A1000`, `sensorless vector control`, `heavy-duty rating`
 4. **claim** — extraction asserts: "The A1000 supports sensorless vector control up to 150% torque at 0.3 Hz"
 5. **uncertainty** — the 0.3 Hz figure appears in one source only; flagged `single_source`
 6. **validation_state** — Validation Layer sets claim to `provisional` (single-source uncertainty)
 7. **promotion_state** — artifact is `staged`, awaiting human review before Node promotion
-8. **receipt** — dry-run receipt emitted: surface=`claude_chat_cloud`, mode=`dry_run`, outcome=`staged`, blockers=`none`, notes=`1 provisional claim flagged`
-9. **adapter** — Claude.ai adapter handled source fetch (URL paste), inline normalization, and cloud receipt emission
+8. **receipt** — dry-run receipt emitted: surface=`cloud_ingress`, mode=`dry_run`, outcome=`staged`, blockers=`none`, notes=`1 provisional claim flagged`
+9. **adapter** — the cloud ingress adapter handled source fetch, inline normalization, and receipt emission
 
 ### Distillation Lane — wiki article refined
 
-1. **source** — raw wiki draft on Floor at `LENY_WrkSps/wiki/VFD_Sensorless_Vector.md`
+1. **source** — a raw wiki draft on the execution surface
 2. **artifact** — structured claim set extracted from the draft
 3. **entity** — extraction identifies: `sensorless vector control`, `open-loop V/f`, `encoder feedback`
 4. **claim** — extraction asserts: "Sensorless vector provides torque control without encoder hardware"
