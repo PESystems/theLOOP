@@ -1,11 +1,10 @@
-> **Historical artifact.** This document was authored under the prior "YAML Family" umbrella name. The active delivery for Issue 01 is [`docs/ontology/contract_spine_ontology.md`](contract_spine_ontology.md). The active umbrella is **LOOP Contract Spine** — see [`docs/naming/LOOP_contract_spine_nomenclature_v0.1.md`](../naming/LOOP_contract_spine_nomenclature_v0.1.md). Content below is preserved for audit purposes.
-
-# YAML Family Ontology v0.3
+# Contract Spine Ontology v0.3
 
 > Status: `draft` — awaiting THEO canonical review
 > Author: LENY
 > Date: 2026-04-13
-> Authority: Issue 01 — Lock the Contract Spine Ontology (originally: Lock the YAML Family Ontology)
+> Authority: `docs/issues/contract_spine_v0_3/01_lock_contract_spine_ontology.md`
+> Naming lock: `docs/naming/LOOP_contract_spine_nomenclature_v0.1.md`
 
 This document defines the shared ontology for the LOOP Contract Spine. All lanes, adapters, schemas, and receipts must use these terms with the meanings defined here. Lane-specific language must map back to these canonical terms — never invent parallel concepts.
 
@@ -29,7 +28,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Role in pipeline:** Artifacts are what lanes operate on. Extraction, validation, and promotion all act on artifacts, not on raw sources.
 
-**What it is NOT:** Not the source itself. A PDF is a source; the YAML contract extracted from it is an artifact. An artifact is not a receipt — artifacts carry content and structure, receipts carry operational outcomes.
+**What it is NOT:** Not the source itself. A PDF is a source; the structured contract extracted from it is an artifact. An artifact is not a receipt — artifacts carry content and structure, receipts carry operational outcomes.
 
 ---
 
@@ -67,7 +66,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Definition:** The system's judgment on a claim after applying validation rules. One of: `pass`, `fail`, `provisional`, `blocked`, `conflict`.
 
-**Role in pipeline:** Validation state is the gate between extraction and promotion. Only claims with appropriate validation states can advance. Validation state is set by the validation contract, not by individual lanes or adapters.
+**Role in pipeline:** Validation state is the gate between extraction and promotion. Only claims with appropriate validation states can advance. Validation state is set by the Validation Layer contract, not by individual lanes or adapters.
 
 **What it is NOT:** Not uncertainty. Uncertainty is the input to validation; validation state is the output. Not promotion state — validation says "this claim has been evaluated," promotion says "this claim has been approved for canonical use."
 
@@ -77,7 +76,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Definition:** The status of a validated artifact or claim's advancement toward canonical truth. One of: `staged`, `promoted`, `rejected`, `reverted`.
 
-**Role in pipeline:** Promotion state governs what reaches the Node. Only `promoted` material becomes coordination truth. `staged` means ready for review. `rejected` means reviewed and denied. `reverted` means previously promoted but withdrawn.
+**Role in pipeline:** Promotion state governs what crosses the Compile Boundary into the Node. Only `promoted` material becomes coordination truth. `staged` means ready for review. `rejected` means reviewed and denied. `reverted` means previously promoted but withdrawn.
 
 **What it is NOT:** Not validation state. Validation determines quality; promotion determines destination. A claim can `pass` validation but remain `staged` if human review is required before Node promotion.
 
@@ -87,9 +86,9 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Definition:** A structured record of a pipeline operation's outcome — what was attempted, on what surface, with what result. Receipts are emitted by every mutating or potentially mutating action.
 
-**Role in pipeline:** Receipts make the system auditable. They connect a contract run to its outcome, surface, and any blockers or conflicts encountered. Dry runs emit receipts. Failures emit receipts. Receipts are lightweight operational records.
+**Role in pipeline:** Receipts make the Contract Spine auditable. They connect a contract run to its outcome, surface, and any blockers or conflicts encountered. Dry runs emit receipts. Failures emit receipts. The Receipt Layer manages receipt emission and structure.
 
-**What it is NOT:** Not a report, manifest, or audit log. A receipt records one operation's outcome in a structured format. It does not narrate, summarize, or aggregate. It does not contain the full artifact — it references it. A receipt is not a replacement for the artifact itself.
+**What it is NOT:** Not a report, manifest, or audit log. A receipt records one operation's outcome in a structured format. It does not narrate, summarize, or aggregate. It does not contain the full artifact — it references it.
 
 ---
 
@@ -97,7 +96,7 @@ This document defines the shared ontology for the LOOP Contract Spine. All lanes
 
 **Definition:** A surface-specific translation layer that wraps the core contract for consumption or emission on a particular runtime. Adapters specify *how* a surface interacts with the contract — read order, field mapping, preflight rules, receipt emission format.
 
-**Role in pipeline:** Adapters sit between the core contract and execution surfaces (Claude.ai, Floor/Cowork, Node/Notion). Each surface gets one adapter. The adapter translates without redefining.
+**Role in pipeline:** Adapters sit between the core contract and execution surfaces (Claude.ai, Floor/Cowork, Node/Notion). Each surface gets one adapter via the Adapter Layer. The adapter translates without redefining.
 
 **What it is NOT:** Not a packet or schema. A packet is a bounded unit of work. A schema defines structure. An adapter defines *how a surface uses* the schema and packets. Adapters may NOT redefine canonical ontology terms — they translate surface-specific concerns only. An adapter that changes what "claim" means is a broken adapter.
 
@@ -123,28 +122,28 @@ adapter wraps [source, artifact, receipt] per surface
 | artifact | entity | extraction identifies |
 | artifact | claim | extraction asserts |
 | claim | uncertainty | evaluation may attach |
-| claim + uncertainty | validation_state | validation contract decides |
-| validation_state | promotion_state | promotion gate advances |
-| promotion_state | receipt | operation emits |
-| adapter | source, artifact, receipt | surface translates |
+| claim + uncertainty | validation_state | Validation Layer decides |
+| validation_state | promotion_state | Compile Boundary advances |
+| promotion_state | receipt | Receipt Layer emits |
+| adapter | source, artifact, receipt | Adapter Layer translates per surface |
 
 ---
 
 ## Worked Examples
 
-### Ingestion — Google Doc enters the system
+### Ingress Lane — Google Doc enters the system
 
 1. **source** — a Google Doc URL shared in Claude.ai chat
-2. **artifact** — LENY normalizes the doc content into a structured YAML contract
+2. **artifact** — LENY normalizes the doc content into a structured contract
 3. **entity** — extraction identifies: `Yaskawa A1000`, `sensorless vector control`, `heavy-duty rating`
 4. **claim** — extraction asserts: "The A1000 supports sensorless vector control up to 150% torque at 0.3 Hz"
 5. **uncertainty** — the 0.3 Hz figure appears in one source only; flagged `single_source`
-6. **validation_state** — validation contract sets claim to `provisional` (single-source uncertainty)
+6. **validation_state** — Validation Layer sets claim to `provisional` (single-source uncertainty)
 7. **promotion_state** — artifact is `staged`, awaiting human review before Node promotion
 8. **receipt** — dry-run receipt emitted: surface=`claude_chat_cloud`, mode=`dry_run`, outcome=`staged`, blockers=`none`, notes=`1 provisional claim flagged`
 9. **adapter** — Claude.ai adapter handled source fetch (URL paste), inline normalization, and cloud receipt emission
 
-### Distillation — wiki article refined
+### Distillation Lane — wiki article refined
 
 1. **source** — raw wiki draft on Floor at `LENY_WrkSps/wiki/VFD_Sensorless_Vector.md`
 2. **artifact** — structured claim set extracted from the draft
@@ -152,7 +151,7 @@ adapter wraps [source, artifact, receipt] per surface
 4. **claim** — extraction asserts: "Sensorless vector provides torque control without encoder hardware"
 5. **uncertainty** — none; claim is well-sourced across multiple datasheets
 6. **validation_state** — `pass` (multi-source, no conflicts)
-7. **promotion_state** — `promoted` after LENY review
+7. **promotion_state** — `promoted` after LENY review; crosses Compile Boundary
 8. **receipt** — write receipt emitted: surface=`floor_execution`, mode=`live_write`, outcome=`promoted`, emitted_artifacts=`[wiki_vfd_sensorless_v1.yaml]`
 9. **adapter** — Floor adapter handled local file read, heavy normalization, and floor receipt emission. Node receives a compiled pointer — not the full artifact.
 
@@ -190,7 +189,7 @@ These patterns indicate the ontology is being violated. Any lane, adapter, or sc
 ### 6. adapter vs packet/schema confusion
 **Drift:** An adapter that defines new fields, reinterprets ontology terms, or acts as a schema extension.
 **Signal:** An adapter file that contains term definitions different from this ontology. An adapter that adds required fields not in the core contract.
-**Rule:** Adapters translate surface concerns. They wrap and map. They never redefine. If an adapter needs a concept the ontology does not have, the ontology must be updated — the adapter does not get to invent it locally.
+**Rule:** Adapters translate surface concerns. They wrap and map. They never redefine. If an adapter needs a concept the ontology does not have, the ontology must be updated through review — the adapter does not get to invent it locally.
 
 ---
 
