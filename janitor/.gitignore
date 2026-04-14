@@ -1,0 +1,14 @@
+# Janitor runtime data — never commit operational state
+state/
+snapshots/
+forms/
+dispatch_packets/
+logs/*.json
+logs/*_dry_run_*.md
+logs/janitor_automation_run_log.md
+logs/d3_preflight_*.md
+
+# Python runtime
+__pycache__/
+*.pyc
+*.pyo

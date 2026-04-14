@@ -1,0 +1,953 @@
+# =============================================================================
+# Floor Janitor State Schema v0.3 — Draft
+# Date: 2026-04-12
+# Status: DESIGN — not yet instantiated
+#
+# This file defines the full schema for janitor_state.yaml.
+# The Janitor overwrites this file in full each run.
+# Recovery: if janitor_state.yaml.tmp exists at startup, the previous write
+# may have failed — read the older janitor_state.yaml and log recovery.
+#
+# Types legend:
+#   str     = string
+#   int     = integer (≥ 0)
+#   iso8601 = "YYYY-MM-DDTHH:MM:SS" (local ET)
+#   bool    = true / false
+#   enum    = one of the listed values
+#   list    = ordered YAML sequence
+#   map     = YAML mapping
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# 1. RUN METADATA
+#    Updated every run. Provides orientation for the next sweep.
+# ---------------------------------------------------------------------------
+run_metadata:
+  run_id: ""
+  # Format: "JAN-YYYYMMDD-NNN" (NNN = zero-padded run number for that day)
+  # Type: str
+  # Default: "" (set on first run to "JAN-YYYYMMDD-001")
+
+  run_timestamp: ""
+  # Type: iso8601
+  # Default: "" (set to current time at run start)
+
+  previous_run_id: ""
+  # Type: str
+  # Default: "" (null on first run; previous run_id thereafter)
+
+  previous_run_timestamp: ""
+  # Type: iso8601
+  # Default: "" (null on first run)
+
+  sweep_type: "scheduled"
+  # Type: enum
+  # Values: scheduled | hook_triggered | manual | partial
+  # Default: "scheduled"
+  # "partial" = run aborted early due to hard stop condition
+
+  sweep_cadence_days: 7
+  # Type: int
+  # Default: 7 (weekly)
+  # Adjustable — set to 14 for bi-weekly during quiet periods
+
+  sweep_duration_seconds: 0
+  # Type: int
+  # Default: 0 (set at run completion)
+
+  run_status: "pending"
+  # Type: enum
+  # Values: pending | running | completed | partial | failed
+  # Default: "pending"
+
+  mcp_available: true
+  # Type: bool
+  # Default: true
+  # Set to false if Notion MCP was unreachable during this run
+
+  schema_version: "v0.3"
+  # Type: str
+  # Tracks schema evolution — Janitor fills missing fields with defaults
+  # when loading an older schema version
+
+# ---------------------------------------------------------------------------
+# 2. TRACKER SNAPSHOTS
+#    One entry per known phase tracker. Compared against previous run
+#    to detect changes, blockers, promotions, convergence.
+# ---------------------------------------------------------------------------
+tracker_snapshots: []
+# Type: list of tracker_snapshot objects
+# Default: [] (empty on first run; populated after first sweep)
+
+# tracker_snapshot object schema:
+#
+#   tracker_id: ""
+#   # Type: str — Notion page ID (32-char hex, no dashes)
+#
+#   tracker_name: ""
+#   # Type: str — human-readable tracker title
+#
+#   notion_url: ""
+#   # Type: str — full Notion URL for linking in reports
+#
+#   status: ""
+#   # Type: enum
+#   # Values: ACTIVE | BLOCKED | PROMOTED | COMPLETE | PROPOSAL | ARCHIVED | UNKNOWN
+#   # Default: "UNKNOWN"
+#
+#   phase: ""
+#   # Type: str — freeform phase description from tracker System State
+#
+#   last_completed_step: ""
+#   # Type: str — most recent completed action from tracker
+#
+#   next_step: ""
+#   # Type: str — next action from tracker
+#
+#   active_blockers: []
+#   # Type: list of str — blocker descriptions extracted from tracker
+#
+#   open_items_count: 0
+#   # Type: int
+#
+#   cross_references: []
+#   # Type: list of str — tracker IDs referenced in Cross-References section
+#
+#   family: ""
+#   # Type: str — tracker family grouping (e.g., "YASK Pipeline Family")
+#   # Default: "" (no family)
+#
+#   read_mode: "live"
+#   # Type: enum
+#   # Values: live | proxied_from_state | fetch_failed
+#   # Default: "live"
+#   # "proxied_from_state" = MCP was down; using last known snapshot
+#   # "fetch_failed" = individual tracker fetch failed
+#
+#   change_priority: "P3"
+#   # Type: enum
+#   # Values: P0 | P1 | P2 | P3
+#   # P0 = status changed to BLOCKED or new G-level blocker
+#   # P1 = phase advanced or phase completed
+#   # P2 = open items changed
+#   # P3 = no change (quiet)
+#
+#   last_change_detected: ""
+#   # Type: iso8601 — when Janitor last saw a change vs previous snapshot
+#
+#   snapshot_timestamp: ""
+#   # Type: iso8601 — when this snapshot was captured
+
+# ---------------------------------------------------------------------------
+# 3. SKILL SNAPSHOTS
+#    One entry per known skill. Built from SKILLS_INDEX + performance log.
+# ---------------------------------------------------------------------------
+skill_snapshots: []
+# Type: list of skill_snapshot objects
+# Default: [] (populated on first sweep)
+
+# skill_snapshot object schema:
+#
+#   skill_name: ""
+#   # Type: str — canonical skill name (e.g., "loop-node-hygiene")
+#
+#   version: ""
+#   # Type: str — current version from skill file
+#
+#   scope: ""
+#   # Type: enum
+#   # Values: brain | floor | global
+#
+#   status: ""
+#   # Type: enum
+#   # Values: active | draft | deprecated | disabled
+#
+#   janitor_classification: ""
+#   # Type: enum
+#   # Values: orchestrated | peer | consumed | independent | read
+#   # Per Section 6 integration map in the agent design doc
+#
+#   last_fired: ""
+#   # Type: iso8601 — from performance log
+#   # Default: "" (never fired)
+#
+#   hit_count: 0
+#   # Type: int — total hits from performance log
+#
+#   miss_count: 0
+#   # Type: int — total misses from performance log
+#
+#   partial_count: 0
+#   # Type: int — total partial hits
+#
+#   improvement_count: 0
+#   # Type: int — number of improvement passes executed
+#
+#   escalation_threshold: 2
+#   # Type: int — min(2 + improvement_count, 5)
+#
+#   threshold_crossed: false
+#   # Type: bool — true if miss_count >= escalation_threshold
+#
+#   skill_file_path: ""
+#   # Type: str — Floor path to SKILL.md
+#
+#   file_modified: ""
+#   # Type: iso8601 — last modified timestamp of skill file
+
+# ---------------------------------------------------------------------------
+# 4. PROMOTION CANDIDATES
+#    Tracked from detection through Malik approval to completion.
+# ---------------------------------------------------------------------------
+promotion_candidates: []
+# Type: list of promotion_candidate objects
+# Default: []
+
+# promotion_candidate object schema:
+#
+#   candidate_id: ""
+#   # Type: str — format "PROMO-YYYYMMDD-NNN"
+#
+#   source_tracker: ""
+#   # Type: str — tracker name that surfaced the candidate
+#
+#   source_tracker_id: ""
+#   # Type: str — Notion page ID
+#
+#   artifact_path: ""
+#   # Type: str — Floor path to the artifact
+#
+#   artifact_exists: false
+#   # Type: bool — verified via Glob on Floor
+#
+#   current_version: ""
+#   # Type: str
+#
+#   target_location: ""
+#   # Type: str — where the promoted artifact should land
+#
+#   promotion_status: "pending_promotion"
+#   # Type: enum
+#   # Values: pending_promotion | notified | promotion_dispatched | completed | invalid
+#   # Default: "pending_promotion"
+#   # "invalid" = artifact check failed or tracker state changed
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   notified_date: ""
+#   # Type: iso8601 — when surfaced in Type 2 report
+#
+#   dispatched_date: ""
+#   # Type: iso8601 — when Type 1 packet sent
+#
+#   completed_date: ""
+#   # Type: iso8601 — when promotion confirmed on next sweep
+
+# ---------------------------------------------------------------------------
+# 5. ACTIVE BLOCKERS (G-Level Register)
+#    Tracks every detected blocker through its escalation lifecycle.
+# ---------------------------------------------------------------------------
+active_blockers: []
+# Type: list of blocker objects
+# Default: []
+
+# blocker object schema:
+#
+#   blocker_id: ""
+#   # Type: str — format "BLK-YYYYMMDD-NNN"
+#
+#   source_tracker: ""
+#   # Type: str — tracker name
+#
+#   source_tracker_id: ""
+#   # Type: str — Notion page ID
+#
+#   description: ""
+#   # Type: str — blocker description from tracker
+#
+#   blocker_type: "tracker_blocked"
+#   # Type: enum
+#   # Values: tracker_blocked | malik_decision | malik_action | g_level_gate | manual_action
+#   # Default: "tracker_blocked"
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   escalation_stage: 1
+#   # Type: enum
+#   # Values: 1 | 2 | 3
+#   # Stage 1: Informational (< 7 days)
+#   # Stage 2: Attention (>= 7 days, 2+ sweeps)
+#   # Stage 3: Critical (>= 21 days, 4+ sweeps)
+#   # Default: 1
+#
+#   sweeps_persisted: 1
+#   # Type: int — how many consecutive sweeps this blocker has appeared
+#   # Default: 1
+#
+#   days_unresolved: 0
+#   # Type: int — calculated from detected_date to current run timestamp
+#
+#   form_generated: false
+#   # Type: bool — true if an HTML clearance form has been generated
+#
+#   form_path: ""
+#   # Type: str — path to the HTML form in forms/
+#
+#   decision_received: false
+#   # Type: bool — true if Malik submitted a decision YAML
+#
+#   decision_path: ""
+#   # Type: str — path to the decision YAML artifact
+
+# ---------------------------------------------------------------------------
+# 6. CLEARED BLOCKERS
+#    Blockers that were resolved. Kept for audit trail.
+# ---------------------------------------------------------------------------
+cleared_blockers: []
+# Type: list of cleared_blocker objects
+# Default: []
+
+# cleared_blocker object schema:
+#
+#   blocker_id: ""
+#   # Type: str — same ID from when it was active
+#
+#   source_tracker: ""
+#   # Type: str
+#
+#   description: ""
+#   # Type: str
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   cleared_date: ""
+#   # Type: iso8601
+#
+#   clearance_method: "tracker_resolved"
+#   # Type: enum
+#   # Values: tracker_resolved | malik_decision | auto_cleared | manual_override
+#   # Default: "tracker_resolved"
+#
+#   total_sweeps_persisted: 0
+#   # Type: int — total sweeps the blocker was active
+#
+#   max_escalation_stage: 1
+#   # Type: int — highest stage reached before clearance
+
+# ---------------------------------------------------------------------------
+# 7. IGNORED BLOCKERS
+#    Blockers Malik explicitly deferred. Resurface at count 10.
+# ---------------------------------------------------------------------------
+ignored_blockers: []
+# Type: list of ignored_blocker objects
+# Default: []
+
+# ignored_blocker object schema:
+#
+#   blocker_id: ""
+#   # Type: str
+#
+#   source_tracker: ""
+#   # Type: str
+#
+#   description: ""
+#   # Type: str
+#
+#   deferred_date: ""
+#   # Type: iso8601 — when Malik deferred it
+#
+#   deferral_reason: ""
+#   # Type: str — from Malik's decision form
+#
+#   ignore_sweep_count: 0
+#   # Type: int — incremented each sweep while deferred
+#   # At count 10, resurfaces as Stage 2 regardless of deferral
+#
+#   resurface_at: 10
+#   # Type: int — configurable threshold for resurfacing
+#   # Default: 10
+
+# ---------------------------------------------------------------------------
+# 8. PENDING DISPATCHES
+#    Tracks Type 1 packets that have been sent but not yet confirmed complete.
+#    Prevents double-triggering.
+# ---------------------------------------------------------------------------
+pending_skill_dispatches: []
+# Type: list of dispatch_record objects
+# Default: []
+
+pending_promotion_dispatches: []
+# Type: list of dispatch_record objects
+# Default: []
+
+pending_migration_dispatches: []
+# Type: list of dispatch_record objects
+# Default: []
+
+# dispatch_record object schema:
+#
+#   dispatch_id: ""
+#   # Type: str — format "DSP-YYYYMMDD-NNN"
+#
+#   target_skill: ""
+#   # Type: str — skill name the packet was sent to
+#
+#   dispatched_date: ""
+#   # Type: iso8601
+#
+#   packet_path: ""
+#   # Type: str — path to the YAML dispatch packet
+#
+#   status: "dispatched"
+#   # Type: enum
+#   # Values: dispatched | confirmed | expired | cancelled
+#   # Default: "dispatched"
+#   # "confirmed" = next sweep detected completion proof
+#   # "expired" = 3 sweeps without completion (manual follow-up needed)
+#   # "cancelled" = dispatch was invalidated (e.g., tracker state changed)
+#
+#   confirmation_evidence: ""
+#   # Type: str — what Janitor observed to confirm completion
+#
+#   confirmed_date: ""
+#   # Type: iso8601
+
+# ---------------------------------------------------------------------------
+# 9. PENDING MANUAL ACTIONS
+#    Non-automatable steps that require Malik's hands (FUSE uploads,
+#    Container deletes via claude.ai, etc.).
+# ---------------------------------------------------------------------------
+pending_manual_actions: []
+# Type: list of manual_action objects
+# Default: []
+
+# manual_action object schema:
+#
+#   action_id: ""
+#   # Type: str — format "MAN-YYYYMMDD-NNN"
+#
+#   description: ""
+#   # Type: str — what Malik needs to do
+#
+#   source_tracker: ""
+#   # Type: str — which tracker surfaced this
+#
+#   source_tracker_id: ""
+#   # Type: str — Notion page ID
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   completed: false
+#   # Type: bool
+#
+#   completed_date: ""
+#   # Type: iso8601
+
+# ---------------------------------------------------------------------------
+# 10. SCHEDULED TASK HEALTH
+#     Tracks expected cadence vs actual last-fire for each scheduled task.
+# ---------------------------------------------------------------------------
+scheduled_tasks: []
+# Type: list of scheduled_task_health objects
+# Default: []
+
+# scheduled_task_health object schema:
+#
+#   task_name: ""
+#   # Type: str — e.g., "loop-node-hygiene-weekly"
+#
+#   expected_cadence: "weekly"
+#   # Type: enum
+#   # Values: daily | weekly | biweekly | monthly
+#   # Default: "weekly"
+#
+#   expected_day: ""
+#   # Type: str — e.g., "Sunday", "Friday", "Saturday"
+#
+#   expected_time: ""
+#   # Type: str — e.g., "08:05"
+#
+#   last_fire_date: ""
+#   # Type: iso8601 — from performance log
+#
+#   missed_window: false
+#   # Type: bool — true if last_fire_date is >48h past expected window
+#
+#   consecutive_misses: 0
+#   # Type: int
+
+# ---------------------------------------------------------------------------
+# 11. IDEA INBOX METADATA
+#     Tracks processing state of the idea inbox (actual ideas live in
+#     state/idea_inbox.yaml as a separate file).
+# ---------------------------------------------------------------------------
+idea_inbox_metadata:
+  last_processed: ""
+  # Type: iso8601
+  # Default: "" (never processed)
+
+  items_pending: 0
+  # Type: int
+
+  items_triaged_this_run: 0
+  # Type: int
+
+  items_archived_total: 0
+  # Type: int
+
+# ---------------------------------------------------------------------------
+# 12. OVERLAP REGISTRY
+#     Known sibling pairs and generic keyword stop list.
+# ---------------------------------------------------------------------------
+known_siblings: []
+# Type: list of sibling_pair objects
+# Default: []
+
+# sibling_pair object schema:
+#
+#   item_a: ""
+#   # Type: str — tracker or skill name
+#
+#   item_b: ""
+#   # Type: str — tracker or skill name
+#
+#   relationship: "sibling"
+#   # Type: enum
+#   # Values: sibling | family | scope_boundary_set
+#   # Default: "sibling"
+#
+#   registered_date: ""
+#   # Type: iso8601
+#
+#   notes: ""
+#   # Type: str
+
+generic_keywords:
+  # Stop list — excluded from overlap scoring to reduce false positives
+  - "LOOP"
+  - "Notion"
+  - "skill"
+  - "tracker"
+  - "phase"
+  - "v1"
+  - "v2"
+  - "v3"
+  - "pipeline"
+  - "YAML"
+  - "Floor"
+  - "Node"
+  - "Container"
+
+# ---------------------------------------------------------------------------
+# 13. DOCTRINE DRIFT REGISTER
+#     Tracks detected stale references and their resolution state.
+# ---------------------------------------------------------------------------
+doctrine_drift_items: []
+# Type: list of drift_item objects
+# Default: []
+
+# drift_item object schema:
+#
+#   drift_id: ""
+#   # Type: str — format "DFT-YYYYMMDD-NNN"
+#
+#   file_path: ""
+#   # Type: str — file containing the stale reference
+#
+#   stale_reference: ""
+#   # Type: str — the outdated reference found
+#
+#   correct_reference: ""
+#   # Type: str — what it should be
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   status: "detected"
+#   # Type: enum
+#   # Values: detected | dispatch_sent | resolved | wont_fix
+#   # Default: "detected"
+#
+#   resolved_date: ""
+#   # Type: iso8601
+
+# ---------------------------------------------------------------------------
+# 14. FILE EVENT QUEUE
+#     For hook-driven triggers (FUTURE MERGE). Queued events processed
+#     on next sweep.
+# ---------------------------------------------------------------------------
+pending_file_events: []
+# Type: list of file_event objects
+# Default: []
+
+# file_event object schema:
+#
+#   event_type: ""
+#   # Type: enum
+#   # Values: new_file | modified_file | deleted_file
+#
+#   file_path: ""
+#   # Type: str
+#
+#   detected_date: ""
+#   # Type: iso8601
+#
+#   processed: false
+#   # Type: bool
+
+
+# =============================================================================
+# FILLED FIRST-RUN EXAMPLE
+# =============================================================================
+# Below is what janitor_state.yaml would look like after the very first
+# scheduled sweep on 2026-04-13 (Sunday evening), assuming current real state.
+# =============================================================================
+
+# --- BEGIN FIRST-RUN EXAMPLE ---
+#
+# run_metadata:
+#   run_id: "JAN-20260413-001"
+#   run_timestamp: "2026-04-13T20:00:00"
+#   previous_run_id: ""
+#   previous_run_timestamp: ""
+#   sweep_type: "scheduled"
+#   sweep_cadence_days: 7
+#   sweep_duration_seconds: 142
+#   run_status: "completed"
+#   mcp_available: true
+#   schema_version: "v0.3"
+#
+# tracker_snapshots:
+#   - tracker_id: "33fd67199b33813583eef130e7d614cb"
+#     tracker_name: "LOOP Ingestion Process"
+#     notion_url: "https://www.notion.so/33fd67199b33813583eef130e7d614cb"
+#     status: "ACTIVE"
+#     phase: "Pilot Complete / Email Next"
+#     last_completed_step: "Pilot 003A accepted, v0.3 schema locked"
+#     next_step: "Design secure email-ingestion abstraction layer"
+#     active_blockers:
+#       - "Security abstraction layer design needed"
+#     open_items_count: 3
+#     cross_references:
+#       - "33fd67199b3381ee815fca929aef8047"
+#     family: ""
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:12"
+#
+#   - tracker_id: "33fd67199b3381ee815fca929aef8047"
+#     tracker_name: "YAML → Notion Write-Through Pipeline"
+#     notion_url: "https://www.notion.so/33fd67199b3381ee815fca929aef8047"
+#     status: "ACTIVE"
+#     phase: "Phase E complete / Phase F ready"
+#     last_completed_step: "3 DB IDs registered, 9 placeholders replaced"
+#     next_step: "Phase F — Notion API client, auth, idempotency"
+#     active_blockers:
+#       - "Auth storage decision for Phase F"
+#     open_items_count: 2
+#     cross_references:
+#       - "33fd67199b33813583eef130e7d614cb"
+#     family: ""
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:18"
+#
+#   - tracker_id: "33fd67199b3381fc9312dd2453d8b12e"
+#     tracker_name: "Dynamic Extraction Integration"
+#     notion_url: "https://www.notion.so/33fd67199b3381fc9312dd2453d8b12e"
+#     status: "ACTIVE"
+#     phase: "Post-Reviewer Build"
+#     last_completed_step: "Gate B reviewer, CLI, templates, runbook built"
+#     next_step: "Execute first manual review on GB-20260411-001"
+#     active_blockers: []
+#     open_items_count: 1
+#     cross_references:
+#       - "33dd67199b3381b8be6cd82805bfe0c2"
+#     family: "YASK Pipeline Family"
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:24"
+#
+#   - tracker_id: "33dd67199b3381b8be6cd82805bfe0c2"
+#     tracker_name: "YASK Autoresearch Harness"
+#     notion_url: "https://www.notion.so/33dd67199b3381b8be6cd82805bfe0c2"
+#     status: "ACTIVE"
+#     phase: "Foundation + all stages pending"
+#     last_completed_step: "Scaling checkpoint, contract eval v0.3 active"
+#     next_step: "Load source files, run spine design"
+#     active_blockers:
+#       - "Source files not accessible in recent sessions"
+#     open_items_count: 4
+#     cross_references:
+#       - "33fd67199b3381fc9312dd2453d8b12e"
+#     family: "YASK Pipeline Family"
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:30"
+#
+#   - tracker_id: "33fd67199b33817db694ca44cce66b2d"
+#     tracker_name: "LOOP v3.0 Doctrine Refresh"
+#     notion_url: "https://www.notion.so/33fd67199b33817db694ca44cce66b2d"
+#     status: "PROMOTED"
+#     phase: "Phase 5 Complete / Phase 6 Partial"
+#     last_completed_step: "v3.0 promoted under Option E"
+#     next_step: "Delete 4 HISTORICAL files from Container, close F1-F4"
+#     active_blockers: []
+#     open_items_count: 5
+#     cross_references: []
+#     family: ""
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:36"
+#
+#   - tracker_id: "33fd67199b3381aea666f1cf80c48239"
+#     tracker_name: "Skill System Refactor TASK-003"
+#     notion_url: "https://www.notion.so/33fd67199b3381aea666f1cf80c48239"
+#     status: "ACTIVE"
+#     phase: "Post-Inventory / Phase 2 Pending"
+#     last_completed_step: "Skill inventory + redundancy/conflict analysis"
+#     next_step: "Phase 2 — defect resolution queue (P0-P3)"
+#     active_blockers:
+#       - "Malik review + Phase 2 authorization"
+#     open_items_count: 3
+#     cross_references: []
+#     family: ""
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:42"
+#
+#   - tracker_id: "33fd67199b3381b6a7bfdd2ca48954c3"
+#     tracker_name: "YAML Family Naming & Cohesion"
+#     notion_url: "https://www.notion.so/33fd67199b3381b6a7bfdd2ca48954c3"
+#     status: "PROPOSAL"
+#     phase: "Vocabulary design"
+#     last_completed_step: "Naming audit, three-slot pattern drafted"
+#     next_step: "Lock convention or defer"
+#     active_blockers:
+#       - "Malik decides path (1/2/3)"
+#     open_items_count: 1
+#     cross_references: []
+#     family: ""
+#     read_mode: "live"
+#     change_priority: "P3"
+#     last_change_detected: ""
+#     snapshot_timestamp: "2026-04-13T20:01:48"
+#
+# skill_snapshots:
+#   - skill_name: "loop-node-hygiene"
+#     version: "v1.0"
+#     scope: "brain"
+#     status: "active"
+#     janitor_classification: "peer"
+#     last_fired: "2026-04-06T08:05:00"
+#     hit_count: 3
+#     miss_count: 0
+#     partial_count: 0
+#     improvement_count: 0
+#     escalation_threshold: 2
+#     threshold_crossed: false
+#     skill_file_path: "LENY_WrkSps/skills/brain/loop-node-hygiene/SKILL.md"
+#     file_modified: "2026-04-06T08:00:00"
+#
+#   - skill_name: "artifact-version-promotion"
+#     version: "v1.1"
+#     scope: "global"
+#     status: "active"
+#     janitor_classification: "orchestrated"
+#     last_fired: "2026-04-11T14:30:00"
+#     hit_count: 5
+#     miss_count: 0
+#     partial_count: 0
+#     improvement_count: 0
+#     escalation_threshold: 2
+#     threshold_crossed: false
+#     skill_file_path: "LENY_WrkSps/skills/global/LOOP_Skill_Artifact_Version_Promotion_v1.0.md"
+#     file_modified: "2026-04-11T14:00:00"
+#
+#   # ... (remaining 32 skills follow the same shape)
+#
+# promotion_candidates: []
+#   # First run — no promotion candidates detected yet. Doctrine Refresh
+#   # is PROMOTED but that promotion is already complete, not pending.
+#
+# active_blockers:
+#   - blocker_id: "BLK-20260413-001"
+#     source_tracker: "Skill System Refactor TASK-003"
+#     source_tracker_id: "33fd67199b3381aea666f1cf80c48239"
+#     description: "Malik review + Phase 2 authorization required"
+#     blocker_type: "malik_decision"
+#     detected_date: "2026-04-13T20:01:42"
+#     escalation_stage: 1
+#     sweeps_persisted: 1
+#     days_unresolved: 0
+#     form_generated: false
+#     form_path: ""
+#     decision_received: false
+#     decision_path: ""
+#
+#   - blocker_id: "BLK-20260413-002"
+#     source_tracker: "YAML Family Naming & Cohesion"
+#     source_tracker_id: "33fd67199b3381b6a7bfdd2ca48954c3"
+#     description: "Malik decides path (1/2/3) for naming convention"
+#     blocker_type: "malik_decision"
+#     detected_date: "2026-04-13T20:01:48"
+#     escalation_stage: 1
+#     sweeps_persisted: 1
+#     days_unresolved: 0
+#     form_generated: false
+#     form_path: ""
+#     decision_received: false
+#     decision_path: ""
+#
+#   - blocker_id: "BLK-20260413-003"
+#     source_tracker: "YAML → Notion Write-Through Pipeline"
+#     source_tracker_id: "33fd67199b3381ee815fca929aef8047"
+#     description: "Auth storage decision for Phase F"
+#     blocker_type: "malik_decision"
+#     detected_date: "2026-04-13T20:01:18"
+#     escalation_stage: 1
+#     sweeps_persisted: 1
+#     days_unresolved: 0
+#     form_generated: false
+#     form_path: ""
+#     decision_received: false
+#     decision_path: ""
+#
+#   - blocker_id: "BLK-20260413-004"
+#     source_tracker: "YASK Autoresearch Harness"
+#     source_tracker_id: "33dd67199b3381b8be6cd82805bfe0c2"
+#     description: "Source files not accessible in recent sessions"
+#     blocker_type: "tracker_blocked"
+#     detected_date: "2026-04-13T20:01:30"
+#     escalation_stage: 1
+#     sweeps_persisted: 1
+#     days_unresolved: 0
+#     form_generated: false
+#     form_path: ""
+#     decision_received: false
+#     decision_path: ""
+#
+# cleared_blockers: []
+#
+# ignored_blockers: []
+#
+# pending_skill_dispatches: []
+#
+# pending_promotion_dispatches: []
+#
+# pending_migration_dispatches: []
+#
+# pending_manual_actions:
+#   - action_id: "MAN-20260413-001"
+#     description: "Delete 4 HISTORICAL files from Container (v2.4, v2.4.1 artifacts)"
+#     source_tracker: "LOOP v3.0 Doctrine Refresh"
+#     source_tracker_id: "33fd67199b33817db694ca44cce66b2d"
+#     detected_date: "2026-04-13T20:01:36"
+#     completed: false
+#     completed_date: ""
+#
+# scheduled_tasks:
+#   - task_name: "loop-node-hygiene-weekly"
+#     expected_cadence: "weekly"
+#     expected_day: "Sunday"
+#     expected_time: "08:05"
+#     last_fire_date: "2026-04-06T08:05:00"
+#     missed_window: true
+#     consecutive_misses: 1
+#
+#   - task_name: "wiki-queue-feeder-weekly"
+#     expected_cadence: "weekly"
+#     expected_day: "Sunday"
+#     expected_time: "07:00"
+#     last_fire_date: "2026-04-06T07:00:00"
+#     missed_window: true
+#     consecutive_misses: 1
+#
+#   - task_name: "wiki-build-weekly"
+#     expected_cadence: "weekly"
+#     expected_day: "Sunday"
+#     expected_time: "08:00"
+#     last_fire_date: "2026-04-06T08:00:00"
+#     missed_window: true
+#     consecutive_misses: 1
+#
+#   - task_name: "vendor-docs-weekly"
+#     expected_cadence: "weekly"
+#     expected_day: "Saturday"
+#     expected_time: "09:00"
+#     last_fire_date: "2026-04-05T09:00:00"
+#     missed_window: true
+#     consecutive_misses: 1
+#
+#   - task_name: "loop-patch-report-weekly"
+#     expected_cadence: "weekly"
+#     expected_day: "Friday"
+#     expected_time: "08:00"
+#     last_fire_date: "2026-04-04T08:00:00"
+#     missed_window: true
+#     consecutive_misses: 1
+#
+# idea_inbox_metadata:
+#   last_processed: ""
+#   items_pending: 0
+#   items_triaged_this_run: 0
+#   items_archived_total: 0
+#
+# known_siblings:
+#   - item_a: "Dynamic Extraction Integration"
+#     item_b: "YASK Autoresearch Harness"
+#     relationship: "family"
+#     registered_date: "2026-04-13T20:02:00"
+#     notes: "YASK Pipeline Family — parent/child"
+#
+#   - item_a: "LOOP Ingestion Process"
+#     item_b: "YAML → Notion Write-Through Pipeline"
+#     relationship: "sibling"
+#     registered_date: "2026-04-13T20:02:00"
+#     notes: "Cross-referenced; Ingestion Phase G feeds into Write-Through"
+#
+# generic_keywords:
+#   - "LOOP"
+#   - "Notion"
+#   - "skill"
+#   - "tracker"
+#   - "phase"
+#   - "v1"
+#   - "v2"
+#   - "v3"
+#   - "pipeline"
+#   - "YAML"
+#   - "Floor"
+#   - "Node"
+#   - "Container"
+#
+# doctrine_drift_items:
+#   - drift_id: "DFT-20260413-001"
+#     file_path: "LENY_WrkSps/skills/global/LOOP_Floor_Index_v1.0.md"
+#     stale_reference: "LOOP_Architecture_v2_4.md — active"
+#     correct_reference: "LOOP_Architecture_v3.0.md — active; v2.4 is HISTORICAL"
+#     detected_date: "2026-04-13T20:02:15"
+#     status: "detected"
+#     resolved_date: ""
+#
+#   - drift_id: "DFT-20260413-002"
+#     file_path: "LENY_WrkSps/skills/brain/task-classification/SKILL.md"
+#     stale_reference: "Governing reference: v2.2"
+#     correct_reference: "Governing reference: v3.0"
+#     detected_date: "2026-04-13T20:02:20"
+#     status: "detected"
+#     resolved_date: ""
+#
+# pending_file_events: []
+#
+# --- END FIRST-RUN EXAMPLE ---
