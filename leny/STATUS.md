@@ -33,5 +33,10 @@ Active execution underway. Contract Spine naming locked. Issue 01 delivered.
 |-------|-----------------|
 | 01 | `docs/ontology/contract_spine_ontology.md`, `docs/ontology/contract_spine_ontology_decision_log.md` |
 
+## Execution Companion
+Contract Spine execution prompts:
+- `leny/prompt_packs/contract_spine_prompt_index_v0.1.md`
+- `leny/prompt_packs/contract_spine_prompt_pack_v0.1.md`
+
 ## Next Action
 Issue 01 delivered. Awaiting THEO canonical review. Issue 02 queued.

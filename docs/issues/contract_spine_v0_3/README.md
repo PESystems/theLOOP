@@ -32,3 +32,11 @@ Use these terms consistently:
 
 ## Status note
 This folder supersedes the earlier YAML-family naming for active work. Use Contract Spine naming in all new implementation artifacts.
+
+## Companion execution prompts
+Token-efficient execution prompts for this stack live in:
+- `leny/prompt_packs/contract_spine_prompt_index_v0.1.md`
+- `leny/prompt_packs/contract_spine_prompt_pack_v0.1.md`
+
+Use the issue files as the authority/spec layer.
+Use the prompt pack as the execution companion.
